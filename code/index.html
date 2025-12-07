@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pharmacy Manager</title>
+    <style>
+        body { font-family: Arial, sans-serif; background-color: #f4f4f9; padding: 20px; }
+        .container { max-width: 1000px; margin: 0 auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+        h1 { text-align: center; color: #333; }
+        
+        /* Form Styles */
+        .form-box { display: flex; flex-wrap: wrap; gap: 10px; background: #e3f2fd; padding: 15px; border-radius: 5px; margin-bottom: 20px; }
+        input { padding: 10px; border: 1px solid #ddd; border-radius: 4px; flex: 1; }
+        button { padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; color: white; font-weight: bold; }
+        .btn-add { background-color: #4CAF50; }
+        .btn-eval { background-color: #FF9800; }
+        .btn-del { background-color: #f44336; }
+        .btn-search { background-color: #2196F3; }
+        
+        /* Messages */
+        .flash { padding: 10px; margin-bottom: 15px; border-radius: 4px; }
+        .flash.success { background-color: #d4edda; color: #155724; }
+        .flash.error { background-color: #f8d7da; color: #721c24; }
+        .flash.warning { background-color: #fff3cd; color: #856404; }
+
+        /* Table Styles */
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #ddd; }
+        th { background-color: #333; color: white; }
+        
+        /* Row Colors based on status */
+        .expired { background-color: #ffcccc; color: #b71c1c; } /* Red */
+        .warning { background-color: #fff4cc; color: #856404; } /* Orange */
+        .safe { background-color: #e8f5e9; color: #1b5e20; }    /* Green */
+        
+        .actions { margin-bottom: 20px; display: flex; gap: 10px; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>🏥 Pharmacy Inventory System</h1>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="flash {{ category }}">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <form action="/add" method="POST" class="form-box">
+        <input type="text" name="name" placeholder="Medicine Name" required>
+        <input type="text" name="batch" placeholder="Batch No" required>
+        <input type="number" name="qty" placeholder="Qty" required>
+        <input type="number" step="0.01" name="price" placeholder="Price" required>
+        <input type="date" name="expiry" required>
+        <button type="submit" class="btn-add">➕ Add</button>
+    </form>
+
+    <div class="actions">
+        <form action="/" method="GET" style="display:flex; gap:5px; flex:1;">
+            <input type="text" name="search" placeholder="Search by Name or Batch...">
+            <button type="submit" class="btn-search">🔍 Search</button>
+            <a href="/"><button type="button" style="background:#999;">Reset</button></a>
+        </form>
+        
+        <a href="/evaluate"><button class="btn-eval">⚠️ Evaluate Log</button></a>
+        <a href="/delete_expired" onclick="return confirm('Are you sure you want to delete all expired items?')"><button class="btn-del">🗑️ Delete Expired</button></a>
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Batch</th>
+                <th>Qty</th>
+                <th>Price</th>
+                <th>Expiry</th>
+                <th>Days Left</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in medicines %}
+            <tr class="{{ row.class }}">
+                <td>{{ row.id }}</td>
+                <td>{{ row.name }}</td>
+                <td>{{ row.batch }}</td>
+                <td>{{ row.qty }}</td>
+                <td>${{ row.price }}</td>
+                <td>{{ row.expiry }}</td>
+                <td><strong>{{ row.days }}</strong></td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="7" style="text-align:center;">No medicines found.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+</body>
+</html>
